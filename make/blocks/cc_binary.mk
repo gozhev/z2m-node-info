@@ -18,7 +18,7 @@ cxxflags = $(call get,cxxflags)
 endef
 
 define pre-after=
-_BUILD_PREFIX := $(patsubst %/,%,$(call get,build_dir))/
+_BUILD_PREFIX := $(call get,build_dir)
 _TARGET := $(_BUILD_PREFIX)$(name)
 _OBJS := $(srcs:%=$(_BUILD_PREFIX)%.o)
 endef
@@ -33,16 +33,13 @@ $(_OBJS): $(_BUILD_PREFIX)%.cc.o: %.cc | $(_BUILD_PREFIX)
 $(_BUILD_PREFIX):
 	mkdir -p $$@
 
-.PHONY: $(name)
-$(name): $(_TARGET)
-
 .PHONY: clean/$(name)
 clean/$(name):
 	rm -f $(_OBJS) |:
 	rm -f $(_TARGET) |:
 	rmdir -p $(_BUILD_PREFIX) |:
 
-all: $(name)
+all: $(_TARGET)
 clean: clean/$(name)
 
 endef
