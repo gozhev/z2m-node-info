@@ -11,15 +11,13 @@ _MODULE := /
 _GetVar = $(if $(2),$(if $($(2)$(1)),$($(2)$(1)),$(call _GetVar,$(1),$(dir $(patsubst %/,%,$(2))))))
 get = $(call _GetVar,$(1),$(_MODULE))
 
+$(call _ImportAll,$(_IMPORT_PREFIX)/blocks/)
+$(call _Import,globals)
+
 .PHONY: all
 all:
 
 .PHONY: clean
 clean:
-
-$(call _ImportAll,$(_IMPORT_PREFIX)/blocks/)
-
-$.build_dir = build/
-$.cxx = g++
 
 endif
