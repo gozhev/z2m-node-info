@@ -1,5 +1,5 @@
-ifndef _BINARY_MK
-_BINARY_MK :=
+ifndef _CC_BINARY_MK
+_CC_BINARY_MK :=
 
 $(call _Import,block)
 
@@ -10,17 +10,40 @@ vars = \
 	srcs \
 	cxx \
 	cxxflags
+pre-before=
 
-define After
-all: $(name)
+define before=
+cxx = $(call get,cxx)
+cxxflags = $(call get,cxxflags)
+endef
 
-_OBJS := $(srcs:%=%.o)
+define pre-after=
+_BUILD_PREFIX := $(patsubst %/,%,$(call get,build_dir))/
+_TARGET := $(_BUILD_PREFIX)$(name)
+_OBJS := $(srcs:%=$(_BUILD_PREFIX)%.o)
+endef
 
-$(name): $$(_OBJS)
+define after=
+$(_TARGET): $(_OBJS) | $(_BUILD_PREFIX)
 	$(cxx) -o $$@ $(cxxflags) $$^
 
-$$(_OBJS): %.cc.o: %.cc
+$(_OBJS): $(_BUILD_PREFIX)%.cc.o: %.cc | $(_BUILD_PREFIX)
 	$(cxx) -c -o $$@ $(cxxflags) $$^
+
+$(_BUILD_PREFIX):
+	mkdir -p $$@
+
+.PHONY: $(name)
+$(name): $(_TARGET)
+
+.PHONY: clean/$(name)
+clean/$(name):
+	rm -f $(_OBJS) |:
+	rm -f $(_TARGET) |:
+	rmdir -p $(_BUILD_PREFIX) |:
+
+all: $(name)
+clean: clean/$(name)
 
 endef
 $;
