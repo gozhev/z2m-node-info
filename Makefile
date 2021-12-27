@@ -1,7 +1,5 @@
 include make/make.mk
 
-$.build_dir = build/
-$.cxx = g++
 $.cxxflags = \
 	-Wall \
 	-Wpedantic \

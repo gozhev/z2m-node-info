@@ -19,4 +19,7 @@ clean:
 
 $(call _ImportAll,$(_IMPORT_PREFIX)/blocks/)
 
+$.build_dir = build/
+$.cxx = g++
+
 endif
