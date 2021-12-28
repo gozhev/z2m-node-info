@@ -1,13 +1,14 @@
 ifndef _BLOCK_MK
 _BLOCK_MK :=
 
-$(call _Import,utility)
+$(call _Include,utility)
 
 define _PreBefore_block
 _BLOCK := block
-_VARS := \
+__MY_VARS := \
 	name \
-	vars \
+	local_vars \
+	inherit_vars \
 	pre-before \
 	before \
 	pre-after \
@@ -15,19 +16,21 @@ _VARS := \
 endef
 
 define _Before_block
-$(foreach x,$(_VARS),$(NL)undefine $(x))
+$(foreach x,$(__MY_VARS),$(NL)undefine $(x))
 endef
 
 define _PreAfter_block
+_INHERIT_VARS := $(sort $(_INHERIT_VARS) $(inherit_vars))
 endef
 
 define _After_block
 define _PreBefore_$(name)
-$(foreach x,$(vars),$(NL)undefine $(x))
+$(foreach x,$(local_vars) $(inherit_vars),$(NL)undefine $(x))
 _BLOCK := $(name)
 $(value pre-before)
 endef
 define _Before_$(name)
+$(foreach x,$(inherit_vars),$(NL)$(x) = $$(call get,$(x)))
 $(value before)
 endef
 define _PreAfter_$(name)
@@ -35,13 +38,13 @@ $(value pre-after)
 endef
 define _After_$(name)
 $(value after)
-$(foreach x,$(vars),$(NL)undefine $(x))
+$(foreach x,$(local_vars) $(inherit_vars),$(NL)undefine $(x))
 endef
 define $(name)
 $$(eval $$(value _PreBefore_$(name)))
 $$(eval $$(_Before_$(name)))
 endef
-$(foreach x,$(_VARS),$(NL)undefine $(x))
+$(foreach x,$(__MY_VARS),$(NL)undefine $(x))
 endef
 
 define block
