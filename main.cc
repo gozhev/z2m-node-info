@@ -265,6 +265,7 @@ private:
 
 	void connected(::std::string const& cause) override
 	{
+		(void) cause;
 		int const qos = 1;
 		auto const topic = ::std::string{"zigbee2mqtt/sensor0"};
 		client_.subscribe(topic, qos, nullptr, subscribe_listener_);
