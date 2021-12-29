@@ -4,7 +4,7 @@ BindsTo=mosquitto.service
 After=network.target mosquitto.service
 
 [Service]
-ExecStart=/home/alarm/devel/z2m-node/info/z2m-node-info
+ExecStart=/home/m/devel/z2m-node/z2m-node-info/build/z2m-node-info
 StandardOutput=inherit
 StandardError=inherit
 Restart=always
