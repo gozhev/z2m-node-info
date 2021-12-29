@@ -2,6 +2,8 @@
 #include <cstdlib>
 #include <iostream>
 #include <memory>
+#include <mutex>
+#include <shared_mutex>
 #include <sstream>
 #include <string>
 #include <string_view>
@@ -20,6 +22,9 @@ namespace b_asio = ::boost::asio;
 namespace b_beast = ::boost::beast;
 namespace b_http = ::boost::beast::http;
 using b_tcp = ::boost::asio::ip::tcp;
+
+::std::string g_state{};
+::std::shared_mutex g_state_mutex{};
 
 template <typename T>
 void HandleRequest(b_http::request<b_http::string_body>&& req, T&& send)
@@ -48,7 +53,11 @@ void HandleRequest(b_http::request<b_http::string_body>&& req, T&& send)
 		return send(bad_request("Illegal request-target"));
 	}
 
-	b_http::string_body::value_type body = "{\"temperature\":20.78}";
+	b_http::string_body::value_type body{};
+	{
+		::std::shared_lock<::std::shared_mutex> lock{g_state_mutex};
+		body = g_state;
+	}
 	auto const size = body.size();
 
 	if (req.method() == b_http::verb::head) {
@@ -263,6 +272,11 @@ private:
 
 	void message_arrived(::mqtt::const_message_ptr msg) override
 	{
+		{
+			auto state = msg->to_string();
+			::std::unique_lock<::std::shared_mutex> lock{g_state_mutex};
+			g_state = ::std::move(state);
+		}
 		::std::cout << "info: mqtt: new message\n";
 		::std::cout << "\ttopic: " << msg->get_topic() << "\n";
 		::std::cout << "\tpayload: " << msg->to_string() << ::std::endl;
